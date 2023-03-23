@@ -1,39 +1,65 @@
-import React, { useEffect, useState } from "react";
+import { MouseEvent, useCallback, useEffect, useState } from "react";
 import "./App.css";
+import ImageComponent from "./ImageComponent";
+import Popup from "./Popup";
 
 function App() {
-  const counter = useKeyCounter();
+  // const counter = useKeyCounter();
+  const [showPopup, setShowPopup] = useState(true);
+
+  const handleButtonClick = (event: MouseEvent<HTMLButtonElement>) => {
+    setShowPopup(false);
+  };
+
   return (
     <div className="App">
-      <section className="App-section">
-        <ImageComponent index={counter} />
-      </section>
+      {showPopup && (
+        <Popup
+          title="Spacebar Game"
+          buttonText="Start"
+          onClick={handleButtonClick}
+        />
+      )}
+      {!showPopup && (
+        <section className="App-section">
+          <Game />
+        </section>
+      )}
     </div>
   );
 }
 
-function ImageComponent(props: { index: number }) {
-  return <img alt="animal" src={`/images/nature/${props.index}img.png`} />;
+function Game() {
+  const counter = useKeyCounter();
+  return (
+    <section className="App-section">
+      <ImageComponent index={counter} />
+    </section>
+  );
 }
 
 function useKeyCounter() {
   const [counter, setCounter] = useState<number>(1);
 
-  useEffect(() => {
-    const upHandler = (evt: KeyboardEvent) => {
-      if (evt.key === " ") {
-        setCounter((cnt) => (cnt === 109 ? 1 : cnt + 1));
-      }
-      if (evt.key === "ArrowLeft") {
-        setCounter((cnt) => (cnt > 1 ? cnt - 1 : cnt));
-      }
-    };
-    const touchendHandler = (evt: TouchEvent) => {
+  const upHandler = useCallback((evt: KeyboardEvent) => {
+    if (evt.key === " ") {
       setCounter((cnt) => (cnt === 109 ? 1 : cnt + 1));
-    };
+    }
+    if (evt.key === "ArrowLeft") {
+      setCounter((cnt) => (cnt > 1 ? cnt - 1 : cnt));
+    }
+  }, []);
 
+  const touchendHandler = useCallback((evt: TouchEvent) => {
+    setCounter((cnt) => (cnt === 109 ? 1 : cnt + 1));
+  }, []);
+
+  useEffect(() => {
     // Preload the images
-    const imageSources = Array.from({ length: 109 }, (_, i) => `/images/nature/${i + 1}img.png`);
+    const imageSources = Array.from(
+      { length: 109 },
+      (_, i) => `/images/nature/${i + 1}img.png`
+    );
     imageSources.forEach((src) => {
       const img = new Image();
       img.src = src;
@@ -45,10 +71,9 @@ function useKeyCounter() {
       window.removeEventListener("keyup", upHandler);
       window.removeEventListener("touchend", touchendHandler);
     };
-  }, []);
+  }, [upHandler, touchendHandler]);
 
   return counter;
 }
-
 
 export default App;
