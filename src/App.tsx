@@ -18,6 +18,7 @@ function ImageComponent(props: { index: number }) {
 
 function useKeyCounter() {
   const [counter, setCounter] = useState<number>(1);
+
   useEffect(() => {
     const upHandler = (evt: KeyboardEvent) => {
       if (evt.key === " ") {
@@ -30,6 +31,14 @@ function useKeyCounter() {
     const touchendHandler = (evt: TouchEvent) => {
       setCounter((cnt) => (cnt === 109 ? 1 : cnt + 1));
     };
+
+    // Preload the images
+    const imageSources = Array.from({ length: 109 }, (_, i) => `/images/nature/${i + 1}img.png`);
+    imageSources.forEach((src) => {
+      const img = new Image();
+      img.src = src;
+    });
+
     window.addEventListener("keyup", upHandler);
     window.addEventListener("touchend", touchendHandler);
     return () => {
@@ -37,7 +46,9 @@ function useKeyCounter() {
       window.removeEventListener("touchend", touchendHandler);
     };
   }, []);
+
   return counter;
 }
+
 
 export default App;
